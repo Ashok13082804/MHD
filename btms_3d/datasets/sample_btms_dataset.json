@@ -1,0 +1,44 @@
+[
+  {
+    "inlet_velocity": 0.05,
+    "inlet_temperature_c": 25.0,
+    "initial_temperature": 25.0,
+    "ambient_temperature": 25.0,
+    "magnetic_field": 0.5,
+    "al2o3_fraction": 0.02,
+    "cuo_fraction": 0.01,
+    "discharge_c_rate": 2.0,
+    "porosity": 0.85,
+    "permeability": 1e-07,
+    "threshold_temp": 35.0,
+    "cooling_mode": "hybrid_nanofluid"
+  },
+  {
+    "inlet_velocity": 0.08,
+    "inlet_temperature_c": 22.0,
+    "initial_temperature": 25.0,
+    "ambient_temperature": 25.0,
+    "magnetic_field": 0.8,
+    "al2o3_fraction": 0.025,
+    "cuo_fraction": 0.015,
+    "discharge_c_rate": 3.0,
+    "porosity": 0.85,
+    "permeability": 1e-07,
+    "threshold_temp": 35.0,
+    "cooling_mode": "hybrid_nanofluid"
+  },
+  {
+    "inlet_velocity": 0.03,
+    "inlet_temperature_c": 28.0,
+    "initial_temperature": 28.0,
+    "ambient_temperature": 28.0,
+    "magnetic_field": 0.0,
+    "al2o3_fraction": 0.0,
+    "cuo_fraction": 0.0,
+    "discharge_c_rate": 1.0,
+    "porosity": 1.0,
+    "permeability": 1.0,
+    "threshold_temp": 35.0,
+    "cooling_mode": "passive"
+  }
+]

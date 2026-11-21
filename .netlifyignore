@@ -1,0 +1,18 @@
+# Dependencies & Environments
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large Datasets & Model Training Artifacts
+data/
+outputs/
+Unity_BTMS_Project/
+.pytest_cache/
+.DS_Store
+
+# Git
+.git/
+.gitignore

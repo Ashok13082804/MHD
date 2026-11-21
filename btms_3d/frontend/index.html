@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTMS-3D Pro | Magnetohydrodynamic Nanofluid Battery Thermal Management Simulation</title>
+
+  <!-- External Stylesheets: Fonts & KaTeX (Local primary with CDN fallback) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/katex.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+
+  <!-- Core Simulation Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!-- Extra Enhanced Styles for Components & Modals -->
+  <style>
+    /* Tooltip overlay */
+    #hover-tooltip {
+      position: absolute;
+      display: none;
+      pointer-events: none;
+      z-index: 50;
+      background: rgba(14, 20, 28, 0.92);
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 4px 16px rgba(0, 212, 255, 0.25);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 11px;
+      color: #fff;
+      transform: translate(-50%, -120%);
+      white-space: nowrap;
+    }
+    #hover-tooltip .tip-id { font-weight: 700; color: var(--accent-cyan); }
+    #hover-tooltip .tip-val { font-family: var(--font-mono); font-weight: 600; margin-left: 6px; }
+
+    /* Extra helper buttons in top bar */
+    .hud-action-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--transition-fast);
+    }
+    .hud-action-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.1);
+    }
+
+    /* Preset buttons for Threshold and C-Rate */
+    .btn-preset-group {
+      display: flex;
+      gap: 4px;
+      margin-top: 5px;
+    }
+    .btn-preset {
+      flex: 1;
+      padding: 3px 0;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: 3px;
+      cursor: pointer;
+      text-align: center;
+      transition: all var(--transition-fast);
+    }
+    .btn-preset:hover, .btn-preset.active {
+      border-color: var(--accent-cyan);
+      color: #fff;
+      background: rgba(0, 212, 255, 0.2);
+    }
+
+    /* Dataset & ML Cards */
+    .ml-result-card {
+      background: rgba(179, 136, 255, 0.08);
+      border: 1px solid rgba(179, 136, 255, 0.3);
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    .ml-result-title {
+      font-weight: 700;
+      color: var(--accent-purple);
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    /* Layer toggle checkboxes */
+    .layer-toggle-btn {
+      padding: 4px 8px;
+      font-size: 10px;
+      border-radius: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .layer-toggle-btn.active {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.12);
+    }
+
+    /* Station indicator badges */
+    .station-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      background: rgba(0, 212, 255, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+    }
+
+    /* Search input for equation explorer */
+    .search-box {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 12px;
+      margin-bottom: 14px;
+      outline: none;
+    }
+    .search-box:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    /* Dataset table */
+    .dataset-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 12px;
+    }
+    .dataset-table th, .dataset-table td {
+      padding: 6px 8px;
+      border: 1px solid var(--border-subtle);
+      text-align: left;
+    }
+    .dataset-table th {
+      background: var(--bg-surface-elevated);
+      color: var(--accent-cyan);
+    }
+    .dataset-table tr:hover {
+      background: rgba(0, 212, 255, 0.08);
+      cursor: pointer;
+    }
+    .dataset-table tr.selected {
+      background: rgba(0, 212, 255, 0.2);
+    }
+
+    /* Toggle Drawer Buttons */
+    .drawer-toggle-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .drawer-toggle-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Toast notification */
+    #toast-notification {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(18, 24, 32, 0.95);
+      border: 1px solid var(--accent-cyan);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    #toast-notification.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==============================================================================
+       1. 3D WebGL Canvas Viewport
+       ============================================================================== -->
+  <div id="viewport-container">
+    <canvas id="canvas-3d"></canvas>
+    <!-- Explicit WebGL fallback diagnostic banner -->
+    <div id="webgl-error-container" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(20,24,33,0.95); border:1px solid #ef4444; border-radius:8px; padding:24px; color:#fff; text-align:center; max-width:480px; z-index:50; box-shadow:0 8px 32px rgba(0,0,0,0.8);">
+      <div style="font-size:32px; margin-bottom:8px;">⚠️</div>
+      <div style="font-weight:700; color:#ef4444; font-size:14px; margin-bottom:6px;">3D WebGL Viewport Initialization Notice</div>
+      <div id="webgl-error-text" style="font-size:12px; color:#94a3b8; line-height:1.5;">WebGL is unavailable or encountered an initialization issue.</div>
+    </div>
+  </div>
+
+  <!-- Interactive Hover Tooltip -->
+  <div id="hover-tooltip">
+    <span class="tip-id" id="tooltip-id">BAT-01</span>:
+    <span class="tip-val" id="tooltip-temp">25.0 °C</span>
+  </div>
+
+  <!-- Toast Notification Message -->
+  <div id="toast-notification">Simulation configuration loaded</div>
+
+  <!-- ==============================================================================
+       2. Top Telemetry HUD Bar
+       ============================================================================== -->
+  <header id="top-hud-bar">
+    <div class="hud-title-group">
+      <div class="hud-logo">MHD</div>
+      <div>
+        <div class="hud-title">BTMS-3D PRO SIMULATOR</div>
+        <div class="hud-subtitle">MHD Hybrid Nanofluid • 180 Cylindrical Cells (12×15) Series Pack • Full-Height Serpentine Cooling Plate • Real-Time Digital Twin</div>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Strip -->
+    <div class="hud-metrics-strip">
+      <div class="metric-pill">
+        <span class="label">T_Max (Peak)</span>
+        <span class="value" id="hud-t-max" style="color: var(--accent-red);">25.0 °C</span>
+      </div>
+
+      <div class="metric-pill">
+        <span class="label">T_Avg (Pack)</span>
+        <span class="value" id="hud-t-avg" style="color: var(--accent-cyan);">25.0 °C</span>
+      </div>
+
+      <div class="metric-pill">
+        <span class="label">T_Min</span>
+        <span class="value" id="hud-t-min" style="color: var(--accent-blue);">25.0 °C</span>
+      </div>
+
+      <div class="metric-pill" title="Battery Cell Thermal Distribution: Normal (0-34°C, Green) / Moderate (35-45°C, Yellow) / Heated (46-60°C+, Red)">
+        <span class="label">Cells (N/M/H)</span>
+        <span class="value" style="font-size: 11px;">
+          <span id="hud-count-normal" style="color: #22c55e;">180</span> /
+          <span id="hud-count-elevated" style="color: #eab308;">0</span> /
+          <span id="hud-count-overheated" style="color: #ef4444;">0</span>
+        </span>
+      </div>
+
+      <div class="metric-pill" title="Pack Temperature Uniformity Target: ΔT < 5.0 K">
+        <span class="label">Uniformity (ΔT)</span>
+        <span class="value" id="hud-delta-t" style="color: #4ade80;">0.0 K (OPTIMAL)</span>
+      </div>
+
+      <div class="metric-pill">
+        <span class="label">Pump Flow / Energy</span>
+        <span class="value" id="hud-flow-vel">0.25 m/s • 0.0 J</span>
+      </div>
+
+      <div class="metric-pill" title="Magnetohydrodynamic Transverse Field B0 and Lorentz Body Force |F_m|">
+        <span class="label">MHD Field / Force</span>
+        <span class="value" id="hud-mhd-val" style="color: var(--accent-cyan);">0.50 T • 0.0 N/m³</span>
+      </div>
+
+      <div class="metric-pill">
+        <span class="label">Sim Time (t)</span>
+        <span class="value" id="hud-sim-time">0.0 s</span>
+      </div>
+
+      <!-- Thermal Status & BMS Protection Badges -->
+      <div class="status-badge normal" id="hud-status-badge">
+        <span id="badge-dot">●</span> <span id="badge-text">NORMAL (PASSIVE)</span>
+      </div>
+
+      <div class="status-badge normal" id="hud-bms-badge" style="font-size: 10px;">
+        <span id="bms-dot">●</span> <span id="bms-text">BMS: NORMAL</span>
+      </div>
+
+      <div class="status-badge normal" id="electrical-validation-badge" style="font-size: 10px; cursor: pointer;" title="Click to validate 180S1P series electrical circuit">
+        ⚡ 180S1P: VALID (666.0V)
+      </div>
+    </div>
+
+    <!-- Top Action Modals & Tools -->
+    <div style="display: flex; gap: 8px;">
+      <button class="hud-action-btn" id="btn-open-history" title="View Full Hotspot Lifecycle Event History and Telemetry">
+        📋 Event History
+      </button>
+      <button class="hud-action-btn" id="btn-open-graphs" title="Open Real-time Telemetry Plots">
+        📈 Live Graphs
+      </button>
+      <button class="hud-action-btn" id="btn-open-equations" title="View 39 Governing Equations with Live Substitutions">
+        📐 39 Equations
+      </button>
+      <button class="hud-action-btn" id="btn-open-dataset" title="Upload and Validate Ingested Datasets">
+        📁 Dataset Ingest
+      </button>
+      <button class="hud-action-btn" id="btn-export-csv" title="Export Simulation Results to CSV">
+        💾 Export CSV
+      </button>
+    </div>
+  </header>
+
+  <!-- ==============================================================================
+       3. Left Floating Engineering Controls Panel
+       ============================================================================== -->
+  <aside id="controls-panel">
+    <div class="panel-header">
+      <span>⚙️ SIMULATION CONTROLS</span>
+      <button class="drawer-toggle-btn" id="btn-toggle-controls" title="Toggle Controls Panel">◀</button>
+    </div>
+
+    <div class="panel-body">
+      <!-- Section 0: Cylindrical Pack Architecture (180 Cells in Series) -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>CYLINDRICAL PACK ARCHITECTURE</span>
+          <span style="font-size: 10px; color: var(--accent-cyan); font-weight: 700;" id="pack-cell-count-badge">180 CELLS (SERIES)</span>
+        </div>
+        
+        <div class="ctrl-row">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Array Configuration:</span>
+          </div>
+          <select id="select-cell-count" class="search-box" style="margin-bottom: 6px; padding: 5px 8px; font-weight: 600;">
+            <option value="180" selected>180 Cells (15 Rows × 12 Cols) - Series Connected (Reference)</option>
+            <option value="600">600 Cells (20 Rows × 30 Cols) - Extended Array</option>
+            <option value="550">550 Cells (22 Rows × 25 Cols)</option>
+            <option value="700">700 Cells (20 Rows × 35 Cols)</option>
+            <option value="1000">1000 Cells (25 Rows × 40 Cols)</option>
+          </select>
+        </div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Cylindrical Cell Type:</span>
+          </div>
+          <select id="select-form-factor" class="search-box" style="margin-bottom: 6px; padding: 5px 8px;">
+            <option value="21700" selected>21700 Cell (Ø21mm × 70mm, 4.8 Ah)</option>
+            <option value="18650">18650 Cell (Ø18mm × 65mm, 3.2 Ah)</option>
+          </select>
+        </div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Wavy Ribbon Material:</span>
+          </div>
+          <select id="select-plate-material" class="search-box" style="margin-bottom: 8px; padding: 5px 8px;">
+            <option value="aluminum" selected>Aluminum 6061-T6 (k = 167 W/m·K)</option>
+            <option value="copper">Copper C11000 (k = 398 W/m·K)</option>
+          </select>
+        </div>
+
+        <div>
+          <button class="hud-action-btn" id="btn-toggle-cutaway" style="width: 100%; justify-content: center; padding: 6px 10px; border-color: var(--accent-cyan); color: var(--accent-cyan);">
+            🔬 Toggle Cutaway / Transparent Microchannels
+          </button>
+        </div>
+      </div>
+
+      <!-- Section A: Playback & Speed Controls -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>SIMULATION EXECUTION</span>
+          <span style="font-size: 10px; color: var(--text-muted);" id="sim-state-text">RUNNING</span>
+        </div>
+        <div class="playback-bar">
+          <button class="btn-icon active" id="btn-play-pause" title="Play / Pause Simulation">⏸ Pause</button>
+          <button class="btn-icon" id="btn-step-forward" title="Advance by 1 Time Step">⏭ Step</button>
+          <button class="btn-icon" id="btn-reset-sim" title="Reset Pack to 25°C Reference">🔄 Reset</button>
+        </div>
+        <div class="ctrl-row" style="margin-top: 8px;">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Time Warp Multiplier:</span>
+            <span class="ctrl-value" id="val-time-warp">1.0x</span>
+          </div>
+          <div class="btn-preset-group">
+            <button class="btn-preset" data-warp="0.5">0.5x</button>
+            <button class="btn-preset active" data-warp="1.0">1.0x</button>
+            <button class="btn-preset" data-warp="2.0">2.0x</button>
+            <button class="btn-preset" data-warp="5.0">5.0x</button>
+            <button class="btn-preset" data-warp="10.0">10.0x</button>
+          </div>
+        </div>
+        <div class="ctrl-row" style="margin-top: 6px;">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Engine Speed Multiplier:</span>
+          </div>
+          <div class="btn-preset-group">
+            <button class="btn-preset" data-speed="1.0">1×</button>
+            <button class="btn-preset" data-speed="2.0">2×</button>
+            <button class="btn-preset active" data-speed="5.0">5×</button>
+            <button class="btn-preset" data-speed="10.0">10×</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section B: Cooling Mode Architecture -->
+      <div class="section-box">
+        <div class="section-title">COOLING MODE ARCHITECTURE</div>
+        <div class="radio-pill-group">
+          <label>
+            <input type="radio" name="cooling_mode" value="Auto" checked>
+            <span>Auto Closed-Loop</span>
+          </label>
+          <label>
+            <input type="radio" name="cooling_mode" value="Passive">
+            <span>Passive Natural</span>
+          </label>
+          <label>
+            <input type="radio" name="cooling_mode" value="Active">
+            <span>Active Forced</span>
+          </label>
+          <label>
+            <input type="radio" name="cooling_mode" value="Hybrid Nanofluid">
+            <span>Hybrid Nanofluid</span>
+          </label>
+          <label>
+            <input type="radio" name="cooling_mode" value="MHD Nanofluid">
+            <span>MHD Nanofluid</span>
+          </label>
+          <label>
+            <input type="radio" name="cooling_mode" value="Heating/Precondition">
+            <span>Preconditioning</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Section C: Thermal Trigger Threshold Slider & Presets -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>HYSTERESIS COOLING CONTROLLER</span>
+        </div>
+        <div class="ctrl-row">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Activation Setpoint (T_target):</span>
+            <span class="ctrl-value" id="val-threshold">35.0 °C</span>
+          </div>
+          <input type="range" id="slider-threshold" min="20" max="50" step="0.5" value="35">
+        </div>
+        <div class="btn-preset-group">
+          <button class="btn-preset" data-thresh="25">25 °C</button>
+          <button class="btn-preset" data-thresh="30">30 °C</button>
+          <button class="btn-preset active" data-thresh="35">35 °C</button>
+          <button class="btn-preset" data-thresh="40">40 °C</button>
+          <button class="btn-preset" data-thresh="45">45 °C</button>
+        </div>
+
+        <div class="ctrl-row" style="margin-top: 10px;">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Deactivation Setpoint (T_off):</span>
+            <span class="ctrl-value" id="val-deact-threshold">32.5 °C</span>
+          </div>
+          <input type="range" id="slider-deact-threshold" min="18" max="45" step="0.5" value="32.5">
+        </div>
+        <div style="font-size: 10px; color: var(--text-secondary); display: flex; justify-content: space-between; margin-top: 4px;">
+          <span>Hysteresis Deadband (ΔT_hyst):</span>
+          <span id="val-hysteresis-band" style="font-family: var(--font-mono); color: var(--accent-cyan); font-weight: 700;">2.5 °C</span>
+        </div>
+      </div>
+
+      <!-- Section C2: Continuous Operation & Localized Hotspot Generator -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>LOCALIZED HOTSPOT & LIFECYCLE</span>
+          <span style="font-size: 9px; color: var(--accent-orange, #f59e0b); font-weight: 700;" id="active-events-count">0 ACTIVE</span>
+        </div>
+        
+        <!-- Cell Breakdown Bar -->
+        <div style="margin-bottom: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; padding: 6px;">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 4px;">
+            <span style="color: var(--text-secondary);">Thermal Breakdown (180 Cells):</span>
+            <span id="pack-uniformity-text" style="color: #4ade80; font-weight: 700;">ΔT < 5.0 K (Compliant)</span>
+          </div>
+          <div style="display: flex; gap: 4px; font-size: 9.5px; font-family: var(--font-mono); justify-content: space-between;">
+            <span style="color: #22c55e;">Normal: <b id="bar-cnt-normal">180</b></span>
+            <span style="color: #eab308;">Moderate: <b id="bar-cnt-elevated">0</b></span>
+            <span style="color: #ef4444;">Heated: <b id="bar-cnt-overheated">0</b></span>
+            <span style="color: #dc2626;">Crit: <b id="bar-cnt-critical">0</b></span>
+          </div>
+        </div>
+
+        <!-- Button: Trigger Exactly 10 Random Hotspots Now -->
+        <button class="btn-preset" id="btn-trigger-random-10" style="width: 100%; margin-bottom: 6px; padding: 6px; font-weight: 700; color: #f59e0b; border-color: rgba(245, 158, 11, 0.5); background: rgba(245, 158, 11, 0.12);">
+          ⚡ Trigger Random 10 Overheated Cells (30s Cycle)
+        </button>
+
+        <!-- Additional Heat Generation Presets -->
+        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">
+          Hotspot Additional Heat (Default 15W):
+        </div>
+        <div class="btn-preset-group" style="margin-bottom: 8px;">
+          <button class="btn-preset btn-heat-preset" data-heat="3.0">Low (3W)</button>
+          <button class="btn-preset btn-heat-preset" data-heat="8.0">Med (8W)</button>
+          <button class="btn-preset btn-heat-preset active" data-heat="15.0">High (15W)</button>
+          <button class="btn-preset btn-heat-preset" data-heat="25.0">V.High (25W)</button>
+        </div>
+
+        <!-- Configurations A to H Grid -->
+        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">
+          Configurations A to H (Independent Events):
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 8px;">
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="A" title="Config A: Single Cell Overheating (CELL-125, +18W for 30s)">Config A (Single Cell)</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="B" title="Config B: Double Adjacent Cells (CELL-125 & 126, +16W)">Config B (Double Adj)</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="C" title="Config C: Triple Adjacent Cells (3 cells linear, +16W)">Config C (Triple Adj)</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="D" title="Config D: Quadruple Adjacent Cells (2x2 Cluster = 4 cells)">Config D (Quad 2x2)</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="E" title="Config E: Small Batch Cluster (2x4 = 8 cells, +15W)">Config E (Small 8 cells)</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="F" title="Config F: Medium Batch Cluster (4x4 = 16 cells, +14W)">Config F (Med 16 cells)</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="G" title="Config G: Large Group Cluster (20+ cells, +14W)">Config G (Large Group)</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="H" title="Config H: Multiple Independent Hotspots across 3 Distant Zones">Config H (Multi-Zone)</button>
+        </div>
+
+        <!-- Predefined Patterns -->
+        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">
+          Geometric Pattern Hotspots:
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; margin-bottom: 8px;">
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="HORIZONTAL" title="Horizontal Row Segment">Horizontal</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="VERTICAL" title="Vertical Column Segment">Vertical</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="CENTRAL" title="Center Core Block">Central</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="EDGE" title="Perimeter Edge Cells">Edge</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="SEPARATED" title="3 Separated Disjoint Points">Separated</button>
+          <button class="btn-preset btn-hotspot-scenario" data-scenario="MULTI_CLUSTER" title="Three 2x2 Clusters">Multi-Cluster</button>
+        </div>
+
+        <!-- Mode 2: Custom Hotspot Generator -->
+        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 6px; margin-bottom: 8px;">
+          <div style="font-size: 10px; font-weight: 700; color: var(--accent-cyan); margin-bottom: 4px;">
+            Mode 2: User-Defined Custom Hotspot:
+          </div>
+          <input type="text" id="input-custom-cells" class="search-box" style="margin-bottom: 4px; padding: 4px 6px; font-size: 10px;" placeholder="Cell IDs (e.g. CELL-125, CELL-126 or click 3D cell)">
+          <div style="display: flex; gap: 6px; margin-bottom: 4px;">
+            <div style="flex: 1;">
+              <span style="font-size: 9px; color: var(--text-muted);">Heat (W):</span>
+              <input type="number" id="input-custom-heat" value="18.0" min="1" max="100" step="1" style="width: 100%; padding: 2px 4px; font-size: 10px; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: #fff; border-radius: 3px;">
+            </div>
+            <div style="flex: 1;">
+              <span style="font-size: 9px; color: var(--text-muted);">Duration (s):</span>
+              <input type="number" id="input-custom-dur" value="30.0" min="5" max="120" step="5" style="width: 100%; padding: 2px 4px; font-size: 10px; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: #fff; border-radius: 3px;">
+            </div>
+          </div>
+          <button class="btn-preset" id="btn-apply-custom-hotspot" style="width: 100%; padding: 4px; font-size: 10px; color: var(--accent-cyan); border-color: var(--accent-cyan);">
+            🔥 Inject Custom Hotspot
+          </button>
+        </div>
+
+        <!-- Mode 1: Automated Hotspot Generator Mode -->
+        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 6px; margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="font-size: 10.5px; font-weight: 700; color: var(--accent-orange, #f59e0b);">Mode 1: Auto Hotspots (10 Cells):</span>
+            <button class="btn-preset" id="btn-toggle-auto-hotspot" style="padding: 2px 8px; font-size: 10px;">OFF</button>
+          </div>
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <select id="select-auto-hotspot-interval" class="search-box" style="margin-bottom: 0; padding: 2px 4px; font-size: 9.5px; flex: 1;">
+              <option value="30" selected>Every 30 Seconds (10 Cells)</option>
+              <option value="15">Every 15 Seconds</option>
+              <option value="10">Every 10 Seconds</option>
+              <option value="60">Every 60 Seconds</option>
+            </select>
+            <input type="number" id="input-auto-seed" value="42" title="Random Seed" style="width: 45px; padding: 2px 4px; font-size: 9.5px; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: #fff; border-radius: 3px;">
+          </div>
+        </div>
+
+        <!-- Action Buttons: Demonstration Sequence & Clear -->
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <button class="btn-preset" id="btn-run-demo-sequence" style="width: 100%; padding: 5px; font-weight: 700; color: #a78bfa; border-color: rgba(167, 139, 250, 0.4); background: rgba(167, 139, 250, 0.1);">
+            🚀 Run 10-Event Test Sequence
+          </button>
+          <div style="display: flex; gap: 4px;">
+            <button class="btn-preset" id="btn-view-event-history" style="flex: 1; padding: 4px; font-size: 10px;">
+              📋 View Events & CSV
+            </button>
+            <button class="btn-preset" id="btn-clear-hotspots" style="flex: 1; padding: 4px; font-size: 10px; border-color: rgba(255,255,255,0.2); color: var(--text-secondary);">
+              🧹 Clear All
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section C3: 6 Battery Modules Telemetry (Modules 1 to 6) -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>6 BATTERY MODULES TELEMETRY (MODULES 1–6)</span>
+          <span style="font-size: 9px; color: var(--accent-cyan);" id="zonal-active-count">0/6 ACTIVE</span>
+        </div>
+        <div id="zonal-telemetry-container" style="max-height: 155px; overflow-y: auto; font-size: 10px; font-family: var(--font-mono); display: flex; flex-direction: column; gap: 4px;">
+          <!-- Dynamically populated 6 modules -->
+        </div>
+      </div>
+
+      <!-- Section D: Battery Electrical Loading (C-Rate) -->
+      <div class="section-box">
+        <div class="section-title">ELECTRICAL DISCHARGE (C-RATE)</div>
+        <div class="ctrl-row">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Discharge Current:</span>
+            <span class="ctrl-value" id="val-c-rate">2.0 C (40.0 A)</span>
+          </div>
+          <input type="range" id="slider-c-rate" min="0.1" max="5.0" step="0.1" value="2.0">
+        </div>
+        <div class="btn-preset-group">
+          <button class="btn-preset" data-crate="0.5">0.5C</button>
+          <button class="btn-preset" data-crate="1.0">1.0C</button>
+          <button class="btn-preset active" data-crate="2.0">2.0C</button>
+          <button class="btn-preset" data-crate="3.0">3.0C</button>
+          <button class="btn-preset" data-crate="4.0">4.0C</button>
+        </div>
+      </div>
+
+      <!-- Section E: Nanofluid Composition & Concentration -->
+      <div class="section-box">
+        <div class="section-title">NANOFLUID PROPERTIES</div>
+        <div class="ctrl-row">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Al₂O₃ Volume Fraction (φ₁):</span>
+            <span class="ctrl-value" id="val-phi1">1.5 %</span>
+          </div>
+          <input type="range" id="slider-phi1" min="0.0" max="4.0" step="0.1" value="1.5">
+        </div>
+        <div class="ctrl-row">
+          <div class="ctrl-header">
+            <span class="ctrl-label">CuO Volume Fraction (φ₂):</span>
+            <span class="ctrl-value" id="val-phi2">1.0 %</span>
+          </div>
+          <input type="range" id="slider-phi2" min="0.0" max="4.0" step="0.1" value="1.0">
+        </div>
+        <div class="ctrl-row">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Total Suspension φ:</span>
+            <span class="ctrl-value" id="val-phi-total" style="color: var(--accent-green);">2.5 %</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section F: Fluid Dynamics & MHD Parameters -->
+      <div class="section-box">
+        <div class="section-title">FLUID & MAGNETOHYDRODYNAMICS</div>
+        <div class="ctrl-row">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Inlet Velocity (U_in):</span>
+            <span class="ctrl-value" id="val-u-in">0.25 m/s</span>
+          </div>
+          <input type="range" id="slider-u-in" min="0.01" max="1.5" step="0.01" value="0.25">
+        </div>
+        <div class="ctrl-row">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Magnetic Field (B₀):</span>
+            <span class="ctrl-value" id="val-b0">0.50 T</span>
+          </div>
+          <input type="range" id="slider-b0" min="0.0" max="2.0" step="0.05" value="0.50">
+        </div>
+        <div class="ctrl-row" style="margin-top: 4px;">
+          <div class="ctrl-header">
+            <span class="ctrl-label">MHD Lorentz Force (|F_m|):</span>
+            <span class="ctrl-value" id="val-lorentz-force" style="color: var(--accent-cyan); font-weight: 700;">0.00 N/m³</span>
+          </div>
+        </div>
+        <div class="ctrl-row">
+          <div class="ctrl-header">
+            <span class="ctrl-label">Porous Permeability (K):</span>
+            <span class="ctrl-value" id="val-k-perm">1.0e-7 m²</span>
+          </div>
+          <input type="range" id="slider-k-perm" min="-9" max="-5" step="0.1" value="-7">
+        </div>
+      </div>
+
+      <!-- Section G: Machine Learning Fast Surrogate -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>AI / ML SURROGATE INFERENCE</span>
+          <span style="font-size: 9px; color: var(--accent-purple);">ONLINE</span>
+        </div>
+        <button class="btn-icon" id="btn-run-ml" style="width: 100%; height: 32px; background: rgba(179, 136, 255, 0.15); border-color: var(--accent-purple); color: #fff;">
+          ⚡ Predict Peak Temperature (ML)
+        </button>
+        <div id="ml-result-container" class="ml-result-card" style="display: none;">
+          <div class="ml-result-title">
+            <span>PREDICTED PEAK T_batt</span>
+            <span id="ml-pred-time" style="font-family: var(--font-mono); font-size: 10px;">2.4 ms</span>
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 18px; font-weight: 800; color: var(--accent-purple); margin-bottom: 4px;" id="ml-pred-val">
+            36.42 °C
+          </div>
+          <div style="font-size: 10.5px; color: var(--text-secondary); display: flex; justify-content: space-between;">
+            <span>Physics Solver T_max:</span>
+            <span id="ml-physics-val" style="font-family: var(--font-mono); color: #fff;">36.15 °C</span>
+          </div>
+          <div style="font-size: 10.5px; color: var(--text-secondary); display: flex; justify-content: space-between; margin-top: 2px;">
+            <span>Absolute Deviation ΔT:</span>
+            <span id="ml-diff-val" style="font-family: var(--font-mono); color: var(--accent-green);">0.27 °C</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==============================================================================
+       4. Right Inspection Floating Panel
+       ============================================================================== -->
+  <aside id="inspection-panel">
+    <div class="panel-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="color: var(--accent-cyan);">🔍</span>
+        <span id="inspect-header-title">BAT-23 (Prismatic Cell)</span>
+      </div>
+      <button class="drawer-toggle-btn" id="btn-toggle-inspection" title="Toggle Inspection Panel">▶</button>
+    </div>
+
+    <!-- 4 Specialized Inspection Tabs -->
+    <div class="tab-nav">
+      <div class="tab-btn active" data-tab="tab-physical">Physical</div>
+      <div class="tab-btn" data-tab="tab-chemical">Chemical</div>
+      <div class="tab-btn" data-tab="tab-engineering">Engineering</div>
+      <div class="tab-btn" data-tab="tab-equations">Formulas</div>
+    </div>
+
+    <div class="inspection-content">
+      <!-- Tab 1: Physical Properties -->
+      <div id="tab-physical" class="tab-pane active">
+        <table class="prop-table" id="table-physical">
+          <tbody>
+            <tr><td class="key">Component ID:</td><td class="val" id="insp-phys-id">BAT-23</td></tr>
+            <tr><td class="key">Geometry / Type:</td><td class="val" id="insp-phys-type">Prismatic Li-Ion Cell</td></tr>
+            <tr><td class="key">Dimensions (L×W×H):</td><td class="val" id="insp-phys-dim">148 × 26 × 91 mm</td></tr>
+            <tr><td class="key">Unit Mass:</td><td class="val" id="insp-phys-mass">0.650 kg</td></tr>
+            <tr><td class="key">Volume:</td><td class="val" id="insp-phys-vol">3.501 × 10⁻⁴ m³</td></tr>
+            <tr><td class="key">Density (ρ):</td><td class="val" id="insp-phys-rho">2,150 kg/m³</td></tr>
+            <tr><td class="key">Specific Heat (Cp):</td><td class="val" id="insp-phys-cp">1,120 J/(kg·K)</td></tr>
+            <tr><td class="key">Conductivity (kx, ky):</td><td class="val" id="insp-phys-kxy">28.5 W/(m·K)</td></tr>
+            <tr><td class="key">Conductivity (kz):</td><td class="val" id="insp-phys-kz">1.25 W/(m·K)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tab 2: Chemical & Electrochemical -->
+      <div id="tab-chemical" class="tab-pane" style="display: none;">
+        <table class="prop-table" id="table-chemical">
+          <tbody>
+            <tr><td class="key">Cathode Chemistry:</td><td class="val" id="insp-chem-cathode">LiNi₀.₈Co₀.₁Mn₀.₁O₂ (NMC-811)</td></tr>
+            <tr><td class="key">Anode Material:</td><td class="val" id="insp-chem-anode">Mesocarbon Microbeads (Graphite)</td></tr>
+            <tr><td class="key">Electrolyte:</td><td class="val" id="insp-chem-electrolyte">1.2M LiPF₆ in EC:EMC (3:7 wt%)</td></tr>
+            <tr><td class="key">Nominal Voltage:</td><td class="val" id="insp-chem-vnom">3.70 V (2.8 - 4.2V range)</td></tr>
+            <tr><td class="key">Rated Capacity:</td><td class="val" id="insp-chem-qrated">20.0 Ah (74.0 Wh)</td></tr>
+            <tr><td class="key">Internal Resistance:</td><td class="val" id="insp-chem-r0">0.015 Ω (15.0 mΩ)</td></tr>
+            <tr><td class="key">Entropic Coeff (dU/dT):</td><td class="val" id="insp-chem-dudt">-0.22 mV/K</td></tr>
+            <tr><td class="key">Thermal Runaway Limit:</td><td class="val" id="insp-chem-runaway" style="color: var(--accent-red);">> 65.0 °C (SEI Breakdown)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tab 3: Live Engineering Telemetry (All 15 Section 8 Parameters) -->
+      <div id="tab-engineering" class="tab-pane" style="display: none;">
+        <table class="prop-table" id="table-engineering">
+          <tbody>
+            <tr><td class="key">1. Cell ID:</td><td class="val" id="insp-eng-cell-id" style="color: var(--accent-cyan); font-weight: 800;">CELL-001</td></tr>
+            <tr><td class="key">2. Module ID:</td><td class="val" id="insp-eng-module-id" style="font-weight: 700;">MODULE_A (Module 1)</td></tr>
+            <tr><td class="key">3. Current Temperature:</td><td class="val" id="insp-eng-temp" style="color: var(--accent-cyan); font-weight: 800; font-size: 13px;">25.00 °C</td></tr>
+            <tr><td class="key">4. Initial Temperature:</td><td class="val" id="insp-eng-init-temp">25.00 °C</td></tr>
+            <tr><td class="key">5. Temperature Increase (ΔT):</td><td class="val" id="insp-eng-temp-inc" style="font-weight: 700; color: #4ade80;">+0.00 °C</td></tr>
+            <tr><td class="key">6. Internal Heat Gen (Q_int):</td><td class="val" id="insp-eng-q-internal">2.76 W (I²R_int)</td></tr>
+            <tr><td class="key">7. Hotspot Heat Gen (P_ext):</td><td class="val" id="insp-eng-q-hotspot" style="color: var(--accent-red); font-weight: 700;">0.00 W</td></tr>
+            <tr><td class="key">8. Cell Thermal Status:</td><td class="val" id="insp-eng-status"><span class="station-badge">Normal (Green)</span></td></tr>
+            <tr><td class="key">9. Cooling Status:</td><td class="val" id="insp-eng-cooling-status" style="font-weight: 700;">OPTIMAL</td></tr>
+            <tr><td class="key">10. Local Coolant Temp:</td><td class="val" id="insp-eng-coolant-temp">20.00 °C</td></tr>
+            <tr><td class="key">11. Local Fluid Velocity:</td><td class="val" id="insp-eng-coolant-vel">0.250 m/s</td></tr>
+            <tr><td class="key">12. Local Pressure:</td><td class="val" id="insp-eng-coolant-press-pa">101,325 Pa</td></tr>
+            <tr><td class="key">13. Local Heat Transfer (Q_rem):</td><td class="val" id="insp-eng-qrem">0.03 W</td></tr>
+            <tr><td class="key">14. Magnetic-Field Strength (B₀):</td><td class="val" id="insp-eng-b-field" style="color: var(--accent-purple); font-weight: 700;">0.50 T</td></tr>
+            <tr><td class="key">15. Cooling-Zone Valve Status:</td><td class="val" id="insp-eng-valve-status" style="font-weight: 700;">MODULATED (50%)</td></tr>
+            <tr><td class="key">Assigned Cooling Zone:</td><td class="val" id="insp-eng-zone" style="color: var(--accent-cyan); font-weight: 700;">ZONE-01</td></tr>
+            <tr><td class="key">Local Coolant Pressure (kPa):</td><td class="val" id="insp-eng-coolant-press">101.3 kPa</td></tr>
+            <tr><td class="key">Cooling Rate (dT/dt):</td><td class="val" id="insp-eng-rate">0.00 °C/s</td></tr>
+            <tr><td class="key">Max / Min Recorded:</td><td class="val" id="insp-eng-extremes">25.0 / 25.0 °C</td></tr>
+            <tr><td class="key">Total Heat Gen Rate (Q):</td><td class="val" id="insp-eng-qgen">2.76 W</td></tr>
+            <tr><td class="key">Net Heat Flow:</td><td class="val" id="insp-eng-qnet" style="font-weight: 700; color: var(--accent-green);">+0.24 W</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top: 10px;">
+          <button class="btn-preset" id="btn-toggle-cell-hotspot" style="width: 100%; padding: 6px; font-weight: 600; color: #fff; background: rgba(239, 68, 68, 0.2); border: 1px solid var(--accent-red);">
+            🔥 Inject / Toggle Cell Hotspot
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 4: Governing Mathematical Formulas with Step-by-Step Numerical Substitution -->
+      <div id="tab-equations" class="tab-pane" style="display: none;">
+        <div id="insp-formulas-container">
+          <!-- Dynamically populated formula cards -->
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==============================================================================
+       5. Scientific 3-Color Scale Legend (0 to 60°C)
+       ============================================================================== -->
+  <div id="color-legend-bar">
+    <div class="legend-title">EXACT 3-COLOR TEMPERATURE SCALE (0–60°C)</div>
+    <div class="legend-gradient" style="background: linear-gradient(to right, #22c55e 0%, #22c55e 56.7%, #eab308 58.3%, #eab308 75%, #ef4444 76.7%, #dc2626 100%);"></div>
+    <div class="legend-labels">
+      <span style="color: #22c55e; font-weight: 700;">0–34°C (Normal)</span>
+      <span style="color: #eab308; font-weight: 700;">35–45°C (Moderate)</span>
+      <span style="color: #ef4444; font-weight: 700;">46–60°C+ (Heated)</span>
+    </div>
+  </div>
+
+  <!-- ==============================================================================
+       6. Bottom Camera Presets & Layer Toggles Toolbar
+       ============================================================================== -->
+  <nav id="bottom-toolbar">
+    <div style="display: flex; gap: 4px; border-right: 1px solid var(--border-subtle); padding-right: 8px;">
+      <span style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); align-self: center; margin-right: 4px;">Camera:</span>
+      <button class="cam-btn active" data-cam="overview" title="Overall View of Entire BTMS Assembly">Pack Overview</button>
+      <button class="cam-btn" data-cam="top" title="Top View (XY Matrix Layout)">Top View</button>
+      <button class="cam-btn" data-cam="front" title="Front Elevation View">Front View</button>
+      <button class="cam-btn" data-cam="side" title="Side Profile of Cold Plate & Channels">Side View</button>
+      <button class="cam-btn" data-cam="isometric" title="Isometric Perspective">Isometric</button>
+      <button class="cam-btn" data-cam="plates" title="Full-Height Metallic Serpentine Cooling Plate">Cooling Plate</button>
+      <button class="cam-btn" data-cam="electrical" title="Series Busbar Interconnections (CELL-001 to CELL-180)">Electrical (Series)</button>
+      <button class="cam-btn" data-cam="flow" title="Nanofluid Flow Velocity & Particles">Nanofluid Flow</button>
+      <button class="cam-btn" data-cam="module_1" title="Zoom to Module 1 (Row 0, Col 0: CELL-001 to CELL-030)">Mod 1</button>
+      <button class="cam-btn" data-cam="module_2" title="Zoom to Module 2 (Row 0, Col 1: CELL-031 to CELL-060)">Mod 2</button>
+      <button class="cam-btn" data-cam="module_3" title="Zoom to Module 3 (Row 0, Col 2: CELL-061 to CELL-090)">Mod 3</button>
+      <button class="cam-btn" data-cam="module_4" title="Zoom to Module 4 (Row 1, Col 0: CELL-091 to CELL-120)">Mod 4</button>
+      <button class="cam-btn" data-cam="module_5" title="Zoom to Module 5 (Row 1, Col 1: CELL-121 to CELL-150)">Mod 5</button>
+      <button class="cam-btn" data-cam="module_6" title="Zoom to Module 6 (Row 1, Col 2: CELL-151 to CELL-180)">Mod 6</button>
+    </div>
+
+    <div style="display: flex; gap: 4px; padding-left: 4px;">
+      <span style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); align-self: center; margin-right: 4px;">Layers:</span>
+      <button class="layer-toggle-btn active" data-layer="cells" id="layer-cells-btn">Cells (180)</button>
+      <button class="layer-toggle-btn active" data-layer="electrical" id="layer-electrical-btn">⚡ Series Busbars</button>
+      <button class="layer-toggle-btn active" data-layer="plates">Continuous Serpentine Plate</button>
+      <button class="layer-toggle-btn active" data-layer="channels">Fluid Lumen</button>
+      <button class="layer-toggle-btn active" data-layer="particles">Nanoparticles</button>
+      <button class="layer-toggle-btn active" data-layer="pipes">Pipelines</button>
+      <button class="layer-toggle-btn active" data-layer="stations">10 Stations</button>
+      <button class="layer-toggle-btn active" data-layer="components">Equipment</button>
+      <button class="layer-toggle-btn" id="btn-toggle-exploded">💥 Exploded View</button>
+    </div>
+  </nav>
+
+  <!-- ==============================================================================
+       7. Modal 1: 24 Governing Equations Explorer
+       ============================================================================== -->
+  <div class="modal-overlay" id="modal-equations">
+    <div class="modal-window">
+      <div class="modal-header">
+        <span>📐 39 GOVERNING MATHEMATICAL EQUATIONS (24 CORE + EQUATIONS A TO O)</span>
+        <button class="close-btn" data-modal="modal-equations">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="search-box" id="eq-search" placeholder="Search formulas by name, symbol, number (e.g. Bernardi, Reynolds, Hartmann, Brinkman, Lorentz)...">
+        <div id="all-equations-list" style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- Populated dynamically with all 24 equations -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================================================
+       8. Modal 2: Dataset Ingest & Range Validation
+       ============================================================================== -->
+  <div class="modal-overlay" id="modal-dataset">
+    <div class="modal-window" style="width: 780px;">
+      <div class="modal-header">
+        <span>📁 CSV / JSON EXPERIMENTAL DATASET INGEST & VALIDATION</span>
+        <button class="close-btn" data-modal="modal-dataset">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="border: 2px dashed var(--border-subtle); border-radius: 8px; padding: 24px; text-align: center; background: rgba(0, 0, 0, 0.2);" id="drop-zone">
+          <div style="font-size: 28px; margin-bottom: 8px;">📤</div>
+          <div style="font-weight: 700; margin-bottom: 4px;">Drag and drop BTMS experiment dataset (.csv or .json)</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Validated columns: U_in, T_in, C_rate, B0, phi1, phi2, k_perm, Q_rated</div>
+          <input type="file" id="dataset-file-input" accept=".csv,.json" style="display: none;">
+          <button class="btn-icon" id="btn-browse-file" style="margin: 0 auto; padding: 6px 16px;">Browse File</button>
+        </div>
+
+        <div id="dataset-summary-box" style="margin-top: 16px; display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 700; color: var(--accent-cyan);" id="dataset-filename-label">dataset.csv (10 Records)</span>
+            <span class="station-badge" id="dataset-valid-status">100% VALIDATED</span>
+          </div>
+          <div style="max-height: 250px; overflow-y: auto;">
+            <table class="dataset-table" id="dataset-records-table">
+              <thead>
+                <tr>
+                  <th>Index</th>
+                  <th>C-Rate</th>
+                  <th>U_in (m/s)</th>
+                  <th>T_in (°C)</th>
+                  <th>B0 (T)</th>
+                  <th>φ_tot (%)</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="dataset-table-body">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================================================
+       9. Modal 3: Live Engineering Dynamic Graphs
+       ============================================================================== -->
+  <div class="modal-overlay" id="modal-graphs">
+    <div class="modal-window" style="width: 900px;">
+      <div class="modal-header">
+        <span>📈 REAL-TIME DYNAMIC TELEMETRY CHARTS</span>
+        <button class="close-btn" data-modal="modal-graphs">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <!-- Chart 1: Temperature History -->
+          <div class="section-box">
+            <div class="section-title">PACK TEMPERATURE PROFILE (°C) VS TIME</div>
+            <canvas id="chart-temp" height="180"></canvas>
+          </div>
+
+          <!-- Chart 2: Coolant ΔT (Inlet vs Outlet) -->
+          <div class="section-box">
+            <div class="section-title">COOLANT INLET VS OUTLET ΔT (°C)</div>
+            <canvas id="chart-coolant" height="180"></canvas>
+          </div>
+
+          <!-- Chart 3: Dimensionless Hydrodynamics (Re, Nu) -->
+          <div class="section-box">
+            <div class="section-title">REYNOLDS (Re) & NUSSELT (Nu) NUMBERS</div>
+            <canvas id="chart-numbers" height="180"></canvas>
+          </div>
+
+          <!-- Chart 4: Thermal Balance (Q_gen vs Q_rem) -->
+          <div class="section-box">
+            <div class="section-title">HEAT GENERATION VS REMOVAL RATE (W)</div>
+            <canvas id="chart-heat" height="180"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================================================
+       10. Modal 4: Hotspot Lifecycle Event History & CSV Export (Requirement 15)
+       ============================================================================== -->
+  <div class="modal-overlay" id="modal-hotspot-history">
+    <div class="modal-window" style="width: 950px; max-width: 95vw;">
+      <div class="modal-header">
+        <span>📋 HOTSPOT EVENT HISTORY & LIFECYCLE AUDIT TRAIL</span>
+        <button class="close-btn" data-modal="modal-hotspot-history">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(0,0,0,0.25); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+          <div style="display: flex; gap: 16px; font-size: 11px;">
+            <span>Active Events: <b id="hist-active-count" style="color: var(--accent-orange, #f59e0b);">0</b></span>
+            <span>Completed / Recovered: <b id="hist-recovered-count" style="color: #4ade80;">0</b></span>
+            <span>Total Recorded: <b id="hist-total-count" style="color: var(--accent-cyan);">0</b></span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="hud-action-btn" id="btn-export-events-csv" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">
+              💾 Export Events CSV
+            </button>
+            <button class="hud-action-btn" id="btn-modal-demo-sequence" style="border-color: #a78bfa; color: #a78bfa;">
+              🚀 Run 10-Event Test Sequence
+            </button>
+          </div>
+        </div>
+
+        <div style="max-height: 380px; overflow-y: auto;">
+          <table class="dataset-table" id="table-event-history">
+            <thead>
+              <tr>
+                <th>Event ID</th>
+                <th>Time (s)</th>
+                <th>Config</th>
+                <th>Cells Affected</th>
+                <th>Heat (W)</th>
+                <th>Duration</th>
+                <th>Peak (°C)</th>
+                <th>Cooling Start</th>
+                <th>Recovery</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-event-history">
+              <tr>
+                <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 16px;">
+                  No hotspot events recorded yet. Trigger a Configuration above or start the Demonstration Sequence.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D Graphics & Engineering Visualization Libraries (Local with CDN fallbacks) -->
+  <script src="/js/vendor/three.min.js"></script>
+  <script src="/js/vendor/OrbitControls.js"></script>
+  <script src="/js/vendor/katex.min.js"></script>
+  <script src="/js/vendor/chart.min.js"></script>
+  <script>
+    // Bulletproof fallback in case of local file loading anomalies
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\\/script>');
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\\/script>');
+    }
+  </script>
+
+  <!-- Application Main Logic -->
+  <script src="/js/main.js?v=mhd_targeted_cooling_v10"></script>
+</body>
+</html>

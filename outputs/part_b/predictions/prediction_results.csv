@@ -1,0 +1,2 @@
+U_in_m_s,T_in_K,T_batt_init_K,T_amb_K,B0_T,phi1_Al2O3,phi2_CuO,k_perm_m2,c_rate,Q_rated_Ah,L_char_m,ML_Model_Used,Physics_T_max_K,ML_Predicted_T_max_K,Absolute_Error_K,Relative_Error_Percent,Thermal_Safety_Phys,Thermal_Safety_ML
+0.06,298.15,300.0,298.15,0.4,0.02,0.01,1e-07,1.5,20.0,0.01,gradient_boosting,421.6169132959641,424.7953019913976,3.1783886954335117,0.7538570192990255,False,False

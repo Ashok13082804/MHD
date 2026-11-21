@@ -1,0 +1,22 @@
+Formula_ID,Formula_Name,Numerical_Result,Unit,Equation
+14,Fluid and Nanoparticle Density Validation & Separation,1.0,Status,"phi1 >= 0, phi2 >= 0, phi1 + phi2 < 1.0; rho_f, rho_s1, rho_s2 separately specified"
+13,Effective Hybrid Nanofluid Density,1109.787,kg/m^3,rho_hnf = (1 - phi1 - phi2)*rho_f + phi1*rho_s1 + phi2*rho_s2
+3-HC,Effective Heat Capacity (Volumetric and Mass-Specific),3727.044228306873,J/(kg*K),(rho*Cp)_hnf = (1 - phi1 - phi2)*(rho*Cp)_f + phi1*(rho*Cp)_s1 + phi2*(rho*Cp)_s2; Cp_hnf = (rho*Cp)_hnf / rho_hnf
+15,Effective Thermal Conductivity (Hybrid Maxwell Model),0.6678588643546468,W/(m*K),k_hnf = k_f * [k_s + 2*k_f - 2*phi*(k_f - k_s)] / [k_s + 2*k_f + phi*(k_f - k_s)]
+15-Visc,Effective Dynamic Viscosity (Brinkman Model),0.0009614979627314854,Pa*s,mu_hnf = mu_f / (1 - phi)^2.5
+16,Joule Heating (Motional Current Model),3.2851022078929926e-05,W/m^3,Q_J = sigma_hnf * |V x B|^2 = sigma_hnf * B0^2 * u^2
+17,Lorentz Force (Electromagnetic Body Force),-0.0006570204415785985,N/m^3,F_L = J x B = -sigma_hnf * B0^2 * u * i_hat
+18,Darcy-Brinkman MHD Momentum Equation Formulation,15.404369762889687,N/m^3,rho_hnf*[dV/dt + (V.grad)V] = -grad(p) + mu_eff*Laplacian(V) - (mu_eff/k)*V + JxB
+4-BATT,Battery Electrochemical Heat Generation (Bernardi Model),13.400000000000006,W,Q_dot_b = I*(V_oc - V) - I*T*(dU_oc/dT)
+1,Hybrid Nanofluid Energy Equation,-0.6226408949832737,K/s,(rho Cp)_eff [dT/dt + u(dT/dx) + v(dT/dy)] = k_eff (d^2T/dx^2 + d^2T/dy^2) + Q_b + Q_visc + Q_J
+2,Darcy-Brinkman MHD Momentum Equation,-3.8459918509259543,N/m^3,rho_hnf [dV/dt + (V.grad)V] = -grad(p) + mu_eff*Laplacian(V) - (mu_eff/k)*V + J x B
+3,Reynolds Number,577.1135473065619,dimensionless,Re = (rho_hnf * U_in * L) / mu_eff
+4,Prandtl Number,5.3657226455921725,dimensionless,Pr = (mu_eff * Cp_hnf) / k_eff
+5,Hartmann Number,0.03696836594320067,dimensionless,Ha = B0 * L * sqrt(sigma_hnf / mu_eff)
+6,Darcy Number,0.0009999999999999998,dimensionless,Da = k / L^2
+7,Brinkman Number,1.9455032202264548e-06,dimensionless,Br = (mu_eff * U_in^2) / (k_eff * Delta_T)
+8,Nusselt Number (Convective),4.36,dimensionless,Nu = (h * L) / k_eff
+9,C-Rate Battery Current,40.0,A,I = C_rate * Q_rated
+10,Boundary Conditions Formulation,0.05,m/s (Applied in Solver),"Inlet: (u=U_in, v=0, T=T_in); Outlet: (du/dn=0, dv/dn=0, dT/dn=0); Wall: (u=0, v=0, q_wall=-k*dT/dn)"
+11,Temperature Continuity at Battery-Coolant Interface,0.0,K,T_b = T_f (at y = y_interface)
+12,Heat Flux Continuity at Interface,-514.9999999999977,W/m^2,-k_b * (dT_b/dn) = -k_f * (dT_f/dn) [Ideal] or (T_b - T_f)/R_tc [With Contact Resistance]

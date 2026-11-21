@@ -1,0 +1,55 @@
+# ==============================================================================
+# Netlify Configuration for BTMS-3D Pro Simulator
+# 180-Cell Cylindrical Battery Thermal Management System with MHD Nanofluid
+# ==============================================================================
+
+[build]
+  # Directory containing the static WebGL Three.js frontend assets
+  publish = "btms_3d/frontend"
+  # Directory where serverless functions are located
+  functions = "netlify/functions"
+
+[build.environment]
+  PYTHON_VERSION = "3.11"
+
+[functions]
+  directory = "netlify/functions"
+
+# ------------------------------------------------------------------------------
+# Redirects & Rewrites: Forward all /api/* requests to Netlify Serverless Function
+# ------------------------------------------------------------------------------
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/api/:splat"
+  status = 200
+  force = true
+
+# ------------------------------------------------------------------------------
+# Security, Caching & Performance Headers
+# ------------------------------------------------------------------------------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Access-Control-Allow-Origin = "*"
+
+# Immutable caching for vendor 3D assets (Three.js, OrbitControls, Chart.js, KaTeX)
+[[headers]]
+  for = "/js/vendor/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache policy for core styles
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"
+
+# Cache policy for main simulation logic
+[[headers]]
+  for = "/js/main.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

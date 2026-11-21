@@ -1,0 +1,40 @@
+================================================================================
+BTMS MHD HYBRID NANOFLUID PREDICTION REPORT (SUBPART B2)
+================================================================================
+
+1. INPUT SPECIFICATIONS:
+   * Coolant Inlet Velocity (U_in)            : 0.06 [m/s]
+   * Coolant Inlet Temperature (T_in)         : 298.15 [K]
+   * Initial Battery Temperature (T_batt_init) : 300.0 [K]
+   * Ambient Temperature (T_amb)              : 298.15 [K]
+   * Magnetic Field Strength (B0)             : 0.4 [T]
+   * Al2O3 Volume Fraction (phi1)             : 0.02 [dimensionless]
+   * CuO Volume Fraction (phi2)               : 0.01 [dimensionless]
+   * Porous Permeability (k_perm)             : 1e-07 [m^2]
+   * Battery Discharge C-Rate                 : 1.5 [C (1/h)]
+   * Rated Battery Capacity (Q_rated)         : 20.0 [Ah]
+   * Characteristic Channel Height (L_char)   : 0.01 [m]
+
+2. THERMOPHYSICAL PROPERTIES:
+   * Effective Density (rho_hnf)             : 1109.79 kg/m^3
+   * Effective Specific Heat (Cp_hnf)        : 3727.04 J/(kg*K)
+   * Effective Thermal Conductivity (k_hnf)  : 0.6679 W/(m*K)
+   * Effective Dynamic Viscosity (mu_hnf)    : 9.6150e-04 Pa*s
+   * Reynolds Number (Re)                    : 692.54
+   * Hartmann Number (Ha)                    : 0.0296
+   * Darcy Number (Da)                       : 1.0000e-03
+   * Battery Current (I)                     : 30.00 A
+   * Battery Heat Generation (Q_b)           : 10.05 W
+
+3. PREDICTION & ERROR ANALYSIS:
+   * Machine Learning Algorithm              : gradient_boosting
+   * Physics Reference Peak Temperature      : 421.62 K (148.47 °C)
+   * ML Predicted Peak Temperature           : 424.80 K (151.65 °C)
+   * Absolute Prediction Discrepancy         : 3.1784 K
+   * Relative Error Percentage               : 0.754%
+   * Safe Thermal Threshold Compliant        : NO
+
+4. SCIENTIFIC DISCLAIMER:
+   Predictions are derived from a physics-informed surrogate model trained on governing
+   hydrodynamic and conjugate thermal transport equations. Model results should be
+   benchmarked against calibrated laboratory experimental tests prior to cell packaging.
